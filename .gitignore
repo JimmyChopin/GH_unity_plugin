@@ -1,5 +1,8 @@
 # exclude everything
-*
-
-# exception to the rule
-!Assets/*
+Library
+Logs
+obj
+Packages
+ProjectSettings
+Temp
+UserSettings
