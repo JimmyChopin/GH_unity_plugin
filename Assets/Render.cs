@@ -1,69 +1,81 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using Unity.Collections ;
+using Unity.Collections;
+using UnityEngine.UI;
+using UnityEditor;
 
+[ExecuteAlways]
 public class Render : MonoBehaviour
 {
-    GraphicsBuffer dataBuffer;
-    
-    void Start()
-    {    
-      //create mesh
-      GameObject renderObject = new GameObject("RenderObject", typeof(MeshFilter), typeof(MeshRenderer));
-      GraphicsBuffer quadVertBuffer = GenerateQuad(1,1,(float)(10.0));
-      // renderObject.GetComponent<MeshFilter>().mesh.SetVertexBufferData(quadVertBuffer);
-    }
-    void OnDestroy(){
-        buffer?.Dispose();
-        buffer = null;
+  
+  public Texture texture;
+  GraphicsBuffer vertBuffer;
+  GraphicsBuffer dataBuffer;
+  RenderParams rp;
 
-    }
+  // void OnEnable() {
+  //   EditorApplication.QueuePlayerLoopUpdate();
+  //   refreshTrickObj = new GameObject("hello");
+  //   Debug.Log( GameObject.Find("hello"));
+  // }
 
-    // Update is called once per frame
-  void OnGUI()
+  void Start()
   {
-        shader = Shader.Find("shader");
-        material = new Material(shader);
-        RenderParams rp = new RenderParams(material);
-        rp.worldBounds = new Bounds(Vector3.zero, 10000*Vector3.one); // use tighter bounds
-        rp.matProps = new MaterialPropertyBlock();
-        rp.matProps.SetBuffer("_Buffer", buffer);
-        rp.matProps.SetInt("_StartIndex", (int)mesh.GetIndexStart(0));
-        // rp.matProps.SetBuffer("_Positions", meshPositions);
-        // rp.matProps.SetInt("_StartIndex", (int)mesh.GetIndexStart(0));
-        // rp.matProps.SetInt("_BaseVertexIndex", (int)mesh.GetBaseVertex(0));
-        // rp.matProps.SetMatrix("_ObjectToWorld", Matrix4x4.Translate(new Vector3(-5, 0, 0)));
-        // rp.matProps.SetFloat("_NumInstances", 10.0f);
-        Graphics.RenderPrimitives(rp, MeshTopology.Triangles, (int)mesh.GetIndexCount(0), 10);
+    Shader shader = Shader.Find("shader");
+    Material material = new Material(shader);
+    //https://docs.unity3d.com/ScriptReference/Shader.PropertyToID.html  && https://forum.unity.com/threads/propertytoid-multiple-shaders.662770/
+    int mainTexID = Shader.PropertyToID("_MainTex");
+    material.SetTexture(mainTexID, texture);
+    rp = new RenderParams(material);
+    rp.worldBounds = new Bounds(Vector3.zero, 1000 * Vector3.one); // use tighter bounds
+    rp.matProps = new MaterialPropertyBlock();
+    GenerateQuadBuffers(12.0f);
+
+  }
+  void OnDestroy()
+  {
+    vertBuffer?.Dispose();
+    dataBuffer?.Dispose();
+    vertBuffer = null;
+    dataBuffer = null;
   }
 
-  GraphicsBuffer GenerateQuad(int width, int length, float size){
-        GraphicsBuffer buffer;
-
-        buffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, 6, 2 * sizeof(float));
-        NativeArray<float> bufferArray =  new NativeArray<float>(12, Allocator.Temp){
-              [0] = 0,[1] = 0,
-              [4] = 10,[5] = -10,
-              [2] = 0,[3] = -10,
-
-
-              [6] = 10,[7] = -10, 
-              [10] = 0,[11] = 0,
-              [8] = 10,[9] = 0,      
-          };
-
-          buffer.SetData(bufferArray);
-
-          dataBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, 1, 2 * sizeof(float));
-          
-          NativeArray<float> dataBufferArr =  new NativeArray<float>(12, Allocator.Temp){
-              [0] = 0,[1] = 0,
-          };
-
-          buffer.SetData(dataBufferArr);
-        return buffer;
+  // Update is called once per frame
+  void Update()
+  {
+      Graphics.RenderPrimitives(rp, MeshTopology.Triangles, (int)6, 3);
   }
+
+  void GenerateQuadBuffers(float cellSize)
+  {    
+
+    vertBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, 6, 2 * sizeof(float));
+    // unity use cw winding order
+    NativeArray<float> bufferArray = new NativeArray<float>(12, Allocator.Temp)
+    {
+      [0] = 0, [1] = 1,
+      [2] = 1, [3] = 1,
+      [4] = 1, [5] = 0,
+      [6] = 1, [7] = 0,
+      [8] = 0, [9] = 0,
+      [10] = 0, [11] = 1,
+    };
+
+    vertBuffer.SetData(bufferArray);
+
+    dataBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, 3, 2 * sizeof(float));
+    NativeArray<float> dataBufferArr = new NativeArray<float>(length: 6, Allocator.Temp)
+    {
+      [0] = 0,      [1] = 0,//col, row
+      [2] = 1,      [3] = 0,
+      [4] = 1,      [5] = 1,
+
+    };
+
+    dataBuffer.SetData(dataBufferArr);
+    rp.matProps.SetBuffer("verticeBuff", vertBuffer);
+    rp.matProps.SetBuffer("gridIndexBuff", dataBuffer);
+    rp.matProps.SetFloat("uCellSize", cellSize);
+  }
+  
 
 }

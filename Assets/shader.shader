@@ -1,7 +1,12 @@
 Shader "shader"
 {
+    Properties{
+        //https://docs.unity3d.com/Manual/SL-VertexFragmentShaderExamples.html
+       [NoScaleOffset] _MainTex ("Texture", 2D) = "white" {}
+    }
     SubShader
     {
+
         Pass
         {
             CGPROGRAM
@@ -16,25 +21,35 @@ Shader "shader"
                 float4 color : COLOR0;
             };
 
-            StructuredBuffer<int> _Triangles;
-            StructuredBuffer<float3> _Positions;
-            uniform uint _StartIndex;
-            uniform uint _BaseVertexIndex;
-            uniform float4x4 _ObjectToWorld;
-            uniform float _NumInstances;
+            StructuredBuffer<float2> verticeBuff;
+            StructuredBuffer<float2> gridIndexBuff;
+            uniform float uCellSize;
+            
+
 
             v2f vert(uint vertexID: SV_VertexID, uint instanceID : SV_InstanceID)
             {
                 v2f o;
-                float3 pos = _Positions[_Triangles[vertexID + _StartIndex] + _BaseVertexIndex];
-                float4 wpos = mul(_ObjectToWorld, float4(pos + float3(instanceID*4.0f, 0, 0), 1.0f));
-                o.pos = mul(UNITY_MATRIX_VP, wpos);
-                o.color = float4(instanceID / _NumInstances, 0.0f, 0.0f, 0.0f);
+                const float3x3 isoMat = 
+                {
+                    float(uCellSize)*0.5f,      -float(uCellSize)*0.5f,      0.0f,
+                    -float(uCellSize)*0.25f,    -float(uCellSize)*0.25f,     0.0f,
+                    0.0f,                       0.0f,                        1.0f
+                };
+                float2 uv = mul(uCellSize, verticeBuff[vertexID%6]);
+                float2 gridIndex = gridIndexBuff[instanceID];//
+                float3 center = mul(isoMat,float3(gridIndex,0.0f));
+                float3 offset = mul(uCellSize, float3(-0.5f, -0.5f,0.0f));
+               
+                float3 pos = float3(uv+center+offset, 0.0f);
+                o.pos = mul(UNITY_MATRIX_VP, float4(pos, 1.0f));
+                o.color = float4(1.0f, 0.0f, 0.0f, 1.0f);
                 return o;
             }
 
             float4 frag(v2f i) : SV_Target
-            {
+
+            
                 return i.color;
             }
             ENDCG
