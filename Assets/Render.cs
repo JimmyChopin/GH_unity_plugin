@@ -3,7 +3,7 @@ using Unity.Collections;
 using UnityEngine.UI;
 using UnityEditor;
 
-[ExecuteAlways]
+// [ExecuteInEditMode]
 public class Render : MonoBehaviour
 {
   
@@ -20,7 +20,7 @@ public class Render : MonoBehaviour
 
   void Start()
   {
-    Shader shader = Shader.Find("shader");
+    Shader shader = Shader.Find("testVert");
     Material material = new Material(shader);
     //https://docs.unity3d.com/ScriptReference/Shader.PropertyToID.html  && https://forum.unity.com/threads/propertytoid-multiple-shaders.662770/
     int mainTexID = Shader.PropertyToID("_MainTex");
@@ -28,28 +28,32 @@ public class Render : MonoBehaviour
     rp = new RenderParams(material);
     rp.worldBounds = new Bounds(Vector3.zero, 1000 * Vector3.one); // use tighter bounds
     rp.matProps = new MaterialPropertyBlock();
-    GenerateQuadBuffers(12.0f);
+
+    float unitePortion = 64/texture.height;
+    GenerateQuadBuffers(64, unitePortion);
 
   }
-  void OnDestroy()
+  void OnDisable()
   {
-    vertBuffer?.Dispose();
-    dataBuffer?.Dispose();
-    vertBuffer = null;
-    dataBuffer = null;
+    vertBuffer?.Release();
+    dataBuffer?.Release();
+
   }
 
   // Update is called once per frame
   void Update()
   {
-      Graphics.RenderPrimitives(rp, MeshTopology.Triangles, (int)6, 3);
+
+      Graphics.RenderPrimitives(rp, MeshTopology.Triangles, (int)6, 2);
   }
 
-  void GenerateQuadBuffers(float cellSize)
+  void GenerateQuadBuffers(int cellSize, float unitePortion)
   {    
 
     vertBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, 6, 2 * sizeof(float));
     // unity use cw winding order
+
+    //
     NativeArray<float> bufferArray = new NativeArray<float>(12, Allocator.Temp)
     {
       [0] = 0, [1] = 1,
@@ -60,22 +64,32 @@ public class Render : MonoBehaviour
       [10] = 0, [11] = 1,
     };
 
+
     vertBuffer.SetData(bufferArray);
 
-    dataBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, 3, 2 * sizeof(float));
-    NativeArray<float> dataBufferArr = new NativeArray<float>(length: 6, Allocator.Temp)
+    dataBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, 6, 2 * sizeof(float));
+
+
+    NativeArray<float> dataBufferArr = new NativeArray<float>(length: 12, Allocator.Temp)
     {
-      [0] = 0,      [1] = 0,//col, row
-      [2] = 1,      [3] = 0,
+      [0] = 3,      [1] = 0, //col, r4ow, width, height
+      [2] = 8,      [3] = 8,
       [4] = 1,      [5] = 1,
 
+      [6] = 6,      [7] = 1, //col, r4ow, width, height
+      [8] = 1,      [9] = 1,
+      [10] = 1,      [11] = 1,
+
     };
+    
 
     dataBuffer.SetData(dataBufferArr);
     rp.matProps.SetBuffer("verticeBuff", vertBuffer);
     rp.matProps.SetBuffer("gridIndexBuff", dataBuffer);
     rp.matProps.SetFloat("uCellSize", cellSize);
+    rp.matProps.SetFloat("unitePortion", unitePortion);
+    
+
   }
-  
 
 }

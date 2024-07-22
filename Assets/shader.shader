@@ -12,20 +12,22 @@ Shader "shader"
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            
 
             #include "UnityCG.cginc"
 
             struct v2f
             {
                 float4 pos : SV_POSITION;
-                float4 color : COLOR0;
+                float2 uv : TEXCOORD0;
             };
 
             StructuredBuffer<float2> verticeBuff;
             StructuredBuffer<float2> gridIndexBuff;
-            uniform float uCellSize;
-            
-
+            uniform int uCellSize;
+            uniform float unitePortion;
+            sampler2D _MainTex;
+            float4 _MainTex_ST;
 
             v2f vert(uint vertexID: SV_VertexID, uint instanceID : SV_InstanceID)
             {
@@ -43,14 +45,17 @@ Shader "shader"
                
                 float3 pos = float3(uv+center+offset, 0.0f);
                 o.pos = mul(UNITY_MATRIX_VP, float4(pos, 1.0f));
-                o.color = float4(1.0f, 0.0f, 0.0f, 1.0f);
+                o.uv = verticeBuff[vertexID%6];
+                // o.uv = TRANSFORM_TEX(verticeBuff[vertexID%6],_MainTex);
                 return o;
             }
+            fixed4 frag (v2f i): SV_Target
+            {
+                // sample the texture
+                fixed4 col = tex2D(_MainTex, i.uv); // float2(0.025,0.025)
+                // fixed4 col = fixed4(uv, 0, 1);
+                return col;
 
-            float4 frag(v2f i) : SV_Target
-
-            
-                return i.color;
             }
             ENDCG
         }

@@ -2,17 +2,19 @@ using UnityEngine;
 using Unity.Collections;
 using UnityEngine.UI;
 using UnityEditor;
+using System;
 [AddComponentMenu("Keanu/KeanuViewer")]
-[ExecuteAlways]
+// [ExecuteInEditMode]
 public class KeanuViewer : MonoBehaviour
 {
   GameObject refreshTrickObj;
   void OnEnable() {
-    DestroyImmediate(GameObject.Find("Render"));
-
+    try{
+        DestroyImmediate(GameObject.Find("vert"));
+    }catch{}
     EditorApplication.QueuePlayerLoopUpdate();
-    refreshTrickObj = new GameObject("Render");
-    refreshTrickObj.AddComponent<Render>();
+    refreshTrickObj = new GameObject("vert");
+    refreshTrickObj.AddComponent<Vert>();
   }
   void OnDisable()
   {
