@@ -10,7 +10,7 @@ public class CameraDrag : MonoBehaviour
  
     void Update()
     {
-        
+        Debug.Log(Input.mouseScrollDelta.y);
         if(Input.mouseScrollDelta.y !=0){
             Camera.main.orthographicSize  -= 10*Input.mouseScrollDelta.y;
         }      

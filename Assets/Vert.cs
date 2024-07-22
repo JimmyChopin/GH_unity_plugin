@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.Mathematics;
 using UnityEngine;
 using Unity.Collections ;
 // [ExecuteInEditMode]
@@ -16,7 +15,7 @@ public class Vert : MonoBehaviour
     RenderParams rp;
 
     const int SQAURE_DATA_SIZE = 8;
-    const int GRID_SIZE = 200;
+    const int GRID_SIZE = 50;
     const int SQAURE_NUMS = GRID_SIZE*GRID_SIZE;
 
     const int VERT_COUNT = 6;
