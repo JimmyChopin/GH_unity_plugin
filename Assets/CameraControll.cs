@@ -32,6 +32,5 @@ public class CameraControll : MonoBehaviour
         // Debug.Log(transform.position);
 
     }
- 
- 
+
 }

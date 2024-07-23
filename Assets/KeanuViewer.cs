@@ -8,12 +8,9 @@ public class KeanuViewer : MonoBehaviour
 {
   GameObject refreshTrickObj;
   void Start() {
-    Camera.main.gameObject.AddComponent<CameraControll>();
-
-  }
-  void OnDestroy() {
-    CameraControll cameraController = Camera.main.gameObject.GetComponent<CameraControll>();
-    Destroy(cameraController);
+    if(!Camera.main.gameObject.GetComponent<CameraControll>()){
+      Camera.main.gameObject.AddComponent<CameraControll>();
+    }
   }
   void OnEnable() {
 
@@ -27,6 +24,5 @@ public class KeanuViewer : MonoBehaviour
   void OnDisable()
   {
     DestroyImmediate(refreshTrickObj);
-
   }
 }
