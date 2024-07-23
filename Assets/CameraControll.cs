@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Scripting.APIUpdating;
 
-public class CameraDrag : MonoBehaviour
+public class CameraControll : MonoBehaviour
 {
     public float dragSpeed = 2;
     private Vector3 dragOrigin;
@@ -11,7 +11,7 @@ public class CameraDrag : MonoBehaviour
     void Update()
     {
         Debug.Log(Input.mouseScrollDelta.y);
-        if(Input.mouseScrollDelta.y !=0){
+        if(Input.mouseScrollDelta.y !=0 && Camera.main.orthographicSize  - 10*Input.mouseScrollDelta.y>1){
             Camera.main.orthographicSize  -= 10*Input.mouseScrollDelta.y;
         }      
         if (Input.GetMouseButtonDown(0))

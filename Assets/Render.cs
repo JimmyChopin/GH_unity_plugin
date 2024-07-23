@@ -2,7 +2,7 @@ using UnityEngine;
 using Unity.Collections;
 using UnityEditor;
 
-// [ExecuteInEditMode]
+[ExecuteInEditMode]
 public class Render : MonoBehaviour
 {
   

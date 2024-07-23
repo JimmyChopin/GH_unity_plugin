@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Collections ;
-// [ExecuteInEditMode]
+[ExecuteInEditMode]
 
 //https://docs.unity3d.com/ScriptReference/Graphics.RenderPrimitives.html
 public class Vert : MonoBehaviour
